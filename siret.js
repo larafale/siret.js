@@ -29,14 +29,11 @@ casper
   }
 
   if(link) this.open(link)
-  console.log(link)
 
 })
 
 .then(function() {
-
-  console.log('fetching')
-
+  
   if(this.exists('#siret')){
 
     var a,b
@@ -63,7 +60,6 @@ casper
 
   }
 
-  
 })
 
 
