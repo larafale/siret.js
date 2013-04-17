@@ -1,6 +1,6 @@
 var casper = require('casper').create()
   , query = casper.cli.options.code 
-  , url = 'https://www.google.fr/#q='+query+'+bilansgratuits'
+  , url = 'https://www.google.fr/#q='+query+'+site:www.bilansgratuits.fr'
   , info = {}
   , link = null
 
