@@ -6,16 +6,23 @@ var casper = require('casper').create()
 
 function getLinks() {
   var links = document.querySelectorAll('h3.r a');
-  return links.length ? links[0].getAttribute('href') : null;
+  return links.length ? Array.prototype.map.call(links, function(link){ return link.getAttribute('href') }) : null;
 }
 
 casper.start(url, function() {
-  var href = this.evaluate(getLinks);
+  var links = this.evaluate(getLinks);
+  
+  if(links.length){
+    for(var i=0; i<links.length; i++){
+      link = (links[i].split('/url?q=')[1]).split('&')[0]
 
-  if(href) {
-    link = (href.split('/url?q=')[1]).split('&')[0];
-    this.open(link);
+      if(/.*.[0-9]{5,}\.htm$/.test(link)){
+        this.open(link);
+        break;
+      }
+    }
   }
+
 });
 
 casper.then(function() {
