@@ -1,5 +1,5 @@
 var casper = require('casper').create()
-  , query = casper.cli.options.code 
+  , query = casper.cli.args[0] 
   , url = 'https://www.google.fr/#q='+query+'+site:www.bilansgratuits.fr'
   , info = {}
   , link = null;
@@ -14,10 +14,11 @@ casper.start(url, function() {
   
   if(links.length){
     for(var i=0; i<links.length; i++){
-      link = (links[i].split('/url?q=')[1]).split('&')[0]
+      link = (links[i].split('/url?q=')[1]).split('&')[0];
 
       if(/.*.[0-9]{5,}\.htm$/.test(link)){
         this.open(link);
+        // console.log('found link -> ' + link);
         break;
       }
     }
@@ -26,27 +27,26 @@ casper.start(url, function() {
 });
 
 casper.then(function() {
-  if(!this.exists('#siret')) return
-  
-  var zipCity = this.fetchText('#fiche-societe > div:nth-child(1) > h3:nth-child(3)').split(' ') // 13100 AIX CEDEX
-    , dataSelector = function(row, col) {return '#infogene-societe table:nth-of-type(1) tr:nth-of-type('+row+') td:nth-of-type('+col+')'}
-    , companyInfos = this.fetchText(dataSelector(4, 1)).replace(/\n/g, '').replace(/\t/g, '').split(':');
 
-  info = {
-    name    : this.fetchText('#fiche-societe > div:nth-child(1) > h1:nth-child(1)'),
-    address : this.fetchText('#fiche-societe > div:nth-child(1) > h3:nth-child(2)'),
-    zipcode : zipCity[0],
-    city    : zipCity.splice(0,1) && zipCity.join(' '),
-    code    : companyInfos[0].substr(0, companyInfos[0].length -1),
-    desc    : companyInfos[1].substr(1, companyInfos[1].length),
-    vat     : this.getHTML(dataSelector(6, 1)).replace(/\n/g, '').replace(/\t/g, ''),
-    siret   : this.fetchText('#siret').split('siret: ')[1],
-    type    : this.getHTML(dataSelector(1, 1)).replace(/\n/g, '').replace(/\t/g, ''),
-    capital : this.getHTML(dataSelector(2, 1)).replace(/\n/g, '').replace(/\t/g, ''),
-    date    : this.getHTML(dataSelector(2, 2)).replace(/\n/g, '').replace(/\t/g, ''),
-    phone   : this.getHTML(dataSelector(5, 1)).replace(/\n/g, '').replace(/\t/g, '').replace(/ /g, ''),
-    link    : link
-  };
+  if(!this.exists('.tableResult')) {
+    console.log('ooo')
+    return;
+  }
+
+  info = this.evaluate(function(){
+      var output = {}
+      var nodes = document.querySelectorAll('.leftElement');
+      [].map.call(nodes, function(node) {
+        output[node.textContent] = node.nextSibling.nextSibling.textContent;
+      });
+      return output
+  });
+
+  info["Nom"] = this.fetchText('h1.accroche')
+  info["Adresse"] = this.fetchText('p.adresse').replace(/\n/g, '').replace(/\t/g, '')
+  info["Siret"] = this.fetchText('p.siret').split('Siret : ')[1]
+  info["Source"] = link
+
 
 });
 
