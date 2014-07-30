@@ -5,10 +5,16 @@ Get full company information providind SIRET or VAT number (only french companie
 
 ### Usage
 
-`casperjs siret.js FR84752052761`
-`casperjs siret.js 'company name'`
-
 ```
+casperjs siret.js FR84752052761
+casperjs siret.js 'company name'
+```
+
+
+### Example
+```
+> casperjs siret.js decathlon
+
 {
     "Activité": "7010Z Activités des sièges sociaux",
     "Capital": "10 250 000 €",
